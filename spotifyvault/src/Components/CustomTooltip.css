@@ -29,4 +29,11 @@
     border-style: solid;
     border-color: #fff transparent transparent transparent;
 }
+
+@media (max-width: 480px) { 
+    .tooltip-content {
+        font-size: 12px;
+        width: 200px;
+    }
+}
   

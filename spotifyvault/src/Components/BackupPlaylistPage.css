@@ -142,3 +142,60 @@
     color: #999;
     text-align: center;
 }
+
+@media (max-width: 800px) {
+    .hero_h1-white-backup, .hero_h1-green-backup {
+      font-size: 90px;
+      line-height: 20px;
+      text-align: center;
+    }
+  
+    .input-container, .content {
+      align-items: left;
+    }
+  
+    .playlist-input {
+      width: 350px;
+    }
+  
+    .tooltip-content {
+      width: 300px;
+    }
+  
+    .fetch-button {
+      width: 250px;
+    }
+  
+    .content {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .playlist-embed, .track-details, .placeholder {
+      margin: 10px 0;
+    }
+  
+    .track-details {
+      max-width: 90%;
+    }
+}
+  
+@media (max-width: 480px) {
+    .hero_h1-white-backup, .hero_h1-green-backup {
+        font-size: 40px;
+        line-height: 0px;
+        text-align: center;
+    }
+
+    .playlist-input {
+        width: 200px;
+    }
+
+    .tooltip-content {
+        width: 250px;
+    }
+
+    .fetch-button {
+        width: 200px;
+    }
+}
