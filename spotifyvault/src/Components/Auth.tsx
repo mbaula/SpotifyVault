@@ -4,6 +4,7 @@ import queryString from 'query-string';
 import { CLIENT_ID, REDIRECT_URI } from '../config';
 import './Auth.css';
 import musicVaultImage from '../assets/music-vault.png';
+import { useNavigate } from 'react-router-dom';
 
 const generateRandomString = (length: number) => {
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -33,21 +34,23 @@ const Auth: React.FC = () => {
   const [codeChallenge, setCodeChallenge] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const codeVerifier = generateRandomString(64);
     localStorage.setItem('code_verifier', codeVerifier);
-
+  
     const getChallenge = async () => {
       const hashed = await sha256(codeVerifier);
       setCodeChallenge(base64encode(hashed));
     };
-
+  
     getChallenge();
-
+  
     const params = queryString.parse(window.location.search);
     if (params.code) {
       fetchToken(params.code as string);
+      navigate('/backup-playlists');
     }
   }, []);
 
@@ -72,7 +75,7 @@ const Auth: React.FC = () => {
   const fetchToken = async (code: string) => {
     setLoading(true);
     const codeVerifier = localStorage.getItem('code_verifier') || '';
-
+  
     const payload = {
       method: 'POST',
       headers: {
@@ -86,12 +89,13 @@ const Auth: React.FC = () => {
         code_verifier: codeVerifier,
       }),
     };
-
+  
     const response = await fetch('https://accounts.spotify.com/api/token', payload);
     const data = await response.json();
     setLoading(false);
     if (data.access_token) {
       setAccessToken(data.access_token);
+      navigate('/backup-playlists');
     }
   };
 
