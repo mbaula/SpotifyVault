@@ -37,12 +37,17 @@ const Auth: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const codeVerifier = generateRandomString(64);
-    localStorage.setItem('code_verifier', codeVerifier);
+    let codeVerifier = localStorage.getItem('code_verifier');
+  
+    if (!codeVerifier) {
+      codeVerifier = generateRandomString(64);
+      localStorage.setItem('code_verifier', codeVerifier);
+    }
   
     const getChallenge = async () => {
-      const hashed = await sha256(codeVerifier);
-      setCodeChallenge(base64encode(hashed));
+      const hashed = await sha256(codeVerifier as string);
+      const challenge = base64encode(hashed);
+      setCodeChallenge(challenge);
     };
   
     getChallenge();
@@ -50,7 +55,6 @@ const Auth: React.FC = () => {
     const params = queryString.parse(window.location.search);
     if (params.code) {
       fetchToken(params.code as string);
-      navigate('/backup-playlists');
     }
   }, []);
 
@@ -95,7 +99,10 @@ const Auth: React.FC = () => {
     setLoading(false);
     if (data.access_token) {
       setAccessToken(data.access_token);
+      localStorage.setItem('access_token', data.access_token);
       navigate('/backup-playlists');
+    } else {
+      console.error('Error fetching token:', data);
     }
   };
 
