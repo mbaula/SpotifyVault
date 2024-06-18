@@ -99,7 +99,7 @@ const Auth: React.FC = () => {
     <div className="app-container">
       <h1 className="hero_h1-white">Spotify</h1>
       <h1 className="hero_h1-green">Vault</h1>
-      <p className="app-slogan">Save your playlists in a secure vault</p>
+      <p className="app-slogan">Save your playlists in a secure vault. <br/> A Spotify Playlist Backup Service.</p>
       <button className="app-button" onClick={handleLogin} disabled={loading}>
         {loading ? <Loader size="sm" className="app-loader" /> : 'Login with Spotify'}
       </button>
