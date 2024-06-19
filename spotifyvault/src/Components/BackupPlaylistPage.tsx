@@ -129,6 +129,7 @@ const BackupPlaylistPage: React.FC = () => {
             frameBorder="0"
             allow="encrypted-media"
             className="playlist-embed"
+            title="Spotify Playlist Embed"
           ></iframe>
         ) : (
           <div className="placeholder">

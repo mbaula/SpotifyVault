@@ -56,7 +56,7 @@ const Auth: React.FC = () => {
     if (params.code) {
       fetchToken(params.code as string);
     }
-  }, []);
+  });
 
   const handleLogin = () => {
     if (!codeChallenge) return;
