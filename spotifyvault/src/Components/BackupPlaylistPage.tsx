@@ -4,6 +4,10 @@ import './BackupPlaylistPage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import CustomTooltip from './CustomTooltip';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const BackupPlaylistPage: React.FC = () => {
   const [playlistId, setPlaylistId] = useState<string>('');
@@ -21,8 +25,44 @@ const BackupPlaylistPage: React.FC = () => {
     }
   };
 
+  const handleExportPlaylist = async () => {
+    if (!accessToken) {
+      console.error('Access token is missing');
+      return;
+    }
+    try {
+      const playlist = await fetchPlaylist(playlistId, accessToken);
+      const csvContent = generateCSV(playlist.tracks.items);
+      
+      if (csvContent.length > 1000000) { 
+        const zip = new JSZip();
+        zip.file(`${playlist.name}.csv`, csvContent);
+        const blob = await zip.generateAsync({ type: "blob" });
+        saveAs(blob, `${playlist.name}.zip`);
+      } else {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `${playlist.name}.csv`);
+      }
+      toast.success('File has been exported and backed up!');
+    } catch (error) {
+      console.error('Error exporting playlist:', error);
+      toast.error('Failed to export playlist.');
+    }
+  };
+
+  const generateCSV = (tracks: any[]) => {
+    const headers = ['Track Name', 'Artist', 'Album'];
+    const rows = tracks.map(track => [
+      track.track.name,
+      track.track.artists.map((artist: any) => artist.name).join(', '),
+      track.track.album.name
+    ]);
+    return [headers, ...rows].map(row => row.join(',')).join('\n');
+  };
+
   return (
     <div className="backup-playlist-page">
+      <ToastContainer position="bottom-center"/>
       <div className="input-container">
         <h1 className="hero_h1-white-backup">Backup your</h1>
         <h1 className="hero_h1-green-backup">Playlists</h1>
@@ -48,6 +88,7 @@ const BackupPlaylistPage: React.FC = () => {
           </CustomTooltip>
         </div>
         <button onClick={handleFetchPlaylist} className="fetch-button">Show Playlist Details</button>
+        <button onClick={handleExportPlaylist} className="export-button">Export as CSV</button>
       </div>
       <div className="content">
         {playlistId ? (

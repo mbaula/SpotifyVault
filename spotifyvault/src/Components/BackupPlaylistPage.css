@@ -143,6 +143,20 @@
     text-align: center;
 }
 
+.export-button {
+    padding: 10px 20px;
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+  
+.export-button:hover {
+    background-color: #17a446;
+}
+
 @media (max-width: 800px) {
     .hero_h1-white-backup, .hero_h1-green-backup {
       font-size: 90px;
