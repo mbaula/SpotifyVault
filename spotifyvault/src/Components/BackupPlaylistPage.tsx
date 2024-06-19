@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { fetchPlaylist } from '../api/spotify';
+import { fetchPlaylist, fetchUserPlaylists } from '../api/spotify';
 import './BackupPlaylistPage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const BackupPlaylistPage: React.FC = () => {
   const [playlistId, setPlaylistId] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const accessToken = localStorage.getItem('access_token');
 
   const handleFetchPlaylist = async () => {
@@ -30,6 +31,7 @@ const BackupPlaylistPage: React.FC = () => {
       console.error('Access token is missing');
       return;
     }
+    setLoading(true);
     try {
       const playlist = await fetchPlaylist(playlistId, accessToken);
       const csvContent = generateCSV(playlist.tracks.items);
@@ -48,15 +50,41 @@ const BackupPlaylistPage: React.FC = () => {
       console.error('Error exporting playlist:', error);
       toast.error('Failed to export playlist.');
     }
+    setLoading(false);
+  };
+
+  const handleExportAllPlaylists = async () => {
+    if (!accessToken) {
+      console.error('Access token is missing');
+      return;
+    }
+    setLoading(true);
+    try {
+      const userPlaylists = await fetchUserPlaylists(accessToken);
+      const zip = new JSZip();
+      for (const playlist of userPlaylists.items) {
+        const playlistData = await fetchPlaylist(playlist.id, accessToken);
+        const csvContent = generateCSV(playlistData.tracks.items);
+        zip.file(`${playlist.name}.csv`, csvContent);
+      }
+      const blob = await zip.generateAsync({ type: "blob" });
+      saveAs(blob, `All_Playlists.zip`);
+      toast.success('All playlists have been exported and backed up!');
+    } catch (error) {
+      console.error('Error exporting all playlists:', error);
+      toast.error('Failed to export all playlists.');
+    }
+    setLoading(false);
   };
 
   const generateCSV = (tracks: any[]) => {
     const headers = ['Track Name', 'Artist', 'Album'];
-    const rows = tracks.map(track => [
-      track.track.name,
-      track.track.artists.map((artist: any) => artist.name).join(', '),
-      track.track.album.name
-    ]);
+    const rows = tracks.map(track => {
+      const trackName = track?.track?.name || 'Unknown Track';
+      const artists = track?.track?.artists?.map((artist: any) => artist.name).join(', ') || 'Unknown Artist';
+      const albumName = track?.track?.album?.name || 'Unknown Album';
+      return [trackName, artists, albumName];
+    });
     return [headers, ...rows].map(row => row.join(',')).join('\n');
   };
 
@@ -89,6 +117,7 @@ const BackupPlaylistPage: React.FC = () => {
         </div>
         <button onClick={handleFetchPlaylist} className="fetch-button">Show Playlist Details</button>
         <button onClick={handleExportPlaylist} className="export-button">Export as CSV</button>
+        <button onClick={handleExportAllPlaylists} className="fetch-all-button">Export All Playlists</button>
       </div>
       <div className="content">
         {playlistId ? (
@@ -99,7 +128,6 @@ const BackupPlaylistPage: React.FC = () => {
             frameBorder="0"
             allow="encrypted-media"
             className="playlist-embed"
-            allowTransparency={true}
           ></iframe>
         ) : (
           <div className="placeholder">
@@ -107,6 +135,12 @@ const BackupPlaylistPage: React.FC = () => {
           </div>
         )}
       </div>
+      {loading && (
+        <>
+          <div className="loader-overlay"></div>
+          <div className="loader-container"><div className="loader"></div></div>
+        </>
+      )}
     </div>
   );
 };

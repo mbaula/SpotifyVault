@@ -11,16 +11,16 @@ export const fetchPlaylist = async (playlistId: string, accessToken: string) => 
     return data;
 };
 
-export const fetchTrackDetails = async (trackId: string, accessToken: string) => {
-    const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch track details');
+export const fetchUserPlaylists = async (accessToken: string) => {
+  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
     }
-    const data = await response.json();
-    return data;
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch user playlists');
+  }
+  const data = await response.json();
+  return data;
 };
   

@@ -61,7 +61,7 @@ const Auth: React.FC = () => {
   const handleLogin = () => {
     if (!codeChallenge) return;
 
-    const scope = 'user-read-private user-read-email';
+    const scope = 'user-read-private user-read-email user-library-read playlist-read-private';
     const authUrl = new URL('https://accounts.spotify.com/authorize');
     const params = {
       response_type: 'code',
