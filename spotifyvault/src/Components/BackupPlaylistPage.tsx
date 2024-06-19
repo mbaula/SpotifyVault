@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { fetchPlaylist, fetchUserPlaylists } from '../api/spotify';
+import { fetchPlaylist, fetchUserPlaylists, fetchAllTracks } from '../api/spotify';
 import './BackupPlaylistPage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
@@ -34,8 +34,9 @@ const BackupPlaylistPage: React.FC = () => {
     setLoading(true);
     try {
       const playlist = await fetchPlaylist(playlistId, accessToken);
-      const csvContent = generateCSV(playlist.tracks.items);
-      
+      const tracks = await fetchAllTracks(playlistId, accessToken);
+      const csvContent = generateCSV(tracks);
+
       if (csvContent.length > 1000000) { 
         const zip = new JSZip();
         zip.file(`${playlist.name}.csv`, csvContent);
@@ -62,9 +63,9 @@ const BackupPlaylistPage: React.FC = () => {
     try {
       const userPlaylists = await fetchUserPlaylists(accessToken);
       const zip = new JSZip();
-      for (const playlist of userPlaylists.items) {
-        const playlistData = await fetchPlaylist(playlist.id, accessToken);
-        const csvContent = generateCSV(playlistData.tracks.items);
+      for (const playlist of userPlaylists) {
+        const tracks = await fetchAllTracks(playlist.id, accessToken);
+        const csvContent = generateCSV(tracks);
         zip.file(`${playlist.name}.csv`, csvContent);
       }
       const blob = await zip.generateAsync({ type: "blob" });
