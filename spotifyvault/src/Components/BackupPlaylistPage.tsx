@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { fetchPlaylist, fetchTrackDetails } from '../api/spotify';
+import { fetchPlaylist } from '../api/spotify';
 import './BackupPlaylistPage.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
@@ -7,7 +7,6 @@ import CustomTooltip from './CustomTooltip';
 
 const BackupPlaylistPage: React.FC = () => {
   const [playlistId, setPlaylistId] = useState<string>('');
-  const [trackDetails, setTrackDetails] = useState<any>(null);
   const accessToken = localStorage.getItem('access_token');
 
   const handleFetchPlaylist = async () => {
@@ -19,19 +18,6 @@ const BackupPlaylistPage: React.FC = () => {
       await fetchPlaylist(playlistId, accessToken);
     } catch (error) {
       console.error('Error fetching playlist:', error);
-    }
-  };
-
-  const handleTrackClick = async (trackId: string) => {
-    if (!accessToken) {
-      console.error('Access token is missing');
-      return;
-    }
-    try {
-      const data = await fetchTrackDetails(trackId, accessToken);
-      setTrackDetails(data);
-    } catch (error) {
-      console.error('Error fetching track details:', error);
     }
   };
 
@@ -72,18 +58,11 @@ const BackupPlaylistPage: React.FC = () => {
             frameBorder="0"
             allow="encrypted-media"
             className="playlist-embed"
+            allowTransparency={true}
           ></iframe>
         ) : (
           <div className="placeholder">
             <p>Please enter a playlist ID to see the embed and track details.</p>
-          </div>
-        )}
-        {trackDetails && (
-          <div className="track-details">
-            <h2>{trackDetails.name}</h2>
-            <p><strong>Artist:</strong> {trackDetails.artists.map((artist: any) => artist.name).join(', ')}</p>
-            <p><strong>Album:</strong> {trackDetails.album.name}</p>
-            <p><strong>Release Date:</strong> {trackDetails.album.release_date}</p>
           </div>
         )}
       </div>
